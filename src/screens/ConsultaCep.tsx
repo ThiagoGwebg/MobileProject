@@ -3,25 +3,25 @@ import {
   View, Text, TextInput, Button, ActivityIndicator,
   Alert, ScrollView, StyleSheet
 } from 'react-native';
-import { buscarCnpj } from '../api';
-import { CnpjInfo } from '../Cnpj';
+import { buscarCep } from '../api';
+import { Endereco } from '../cep';
 
-export default function ConsultaCnpjScreen() {
-  const [cnpj, setCnpj] = useState<string>('');
-  const [dados, setDados] = useState<CnpjInfo | null>(null);
+export default function ConsultaCepScreen() {
+  const [cep, setCep] = useState<string>('');
+  const [dados, setDados] = useState<Endereco | null>(null);
   const [carregando, setCarregando] = useState<boolean>(false);
 
   async function consultar(): Promise<void> {
-    const limpo = cnpj.replace(/\D/g, '');
-    if (limpo.length !== 14) {
-      Alert.alert('Atenção', 'Digite um CNPJ com 14 dígitos.');
+    const limpo = cep.replace(/\D/g, '');
+    if (limpo.length !== 8) {
+      Alert.alert('Atenção', 'Digite um CEP com 8 dígitos.');
       return;
     }
     try {
       setCarregando(true);
-      setDados(await buscarCnpj(limpo));
+      setDados(await buscarCep(limpo));
     } catch {
-      Alert.alert('Erro', 'Não foi possível consultar o CNPJ.');
+      Alert.alert('Erro', 'Não foi possível consultar o CEP.');
     } finally {
       setCarregando(false);
     }
@@ -29,13 +29,14 @@ export default function ConsultaCnpjScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.titulo}>Consulta CNPJ</Text>
+      <Text style={styles.titulo}>Consulta CEP</Text>
 
       <TextInput
-        placeholder="00.000.000/0000-00"
-        value={cnpj}
-        onChangeText={setCnpj}
+        placeholder="00000-000"
+        value={cep}
+        onChangeText={setCep}
         keyboardType="numeric"
+        maxLength={9}
         style={styles.input}
       />
 
@@ -49,18 +50,13 @@ export default function ConsultaCnpjScreen() {
 
       {dados && (
         <View style={styles.card}>
-          <Text style={styles.nome}>{dados.nome}</Text>
-          {!!dados.fantasia && <Text style={styles.fantasia}>{dados.fantasia}</Text>}
-          <Text>CNPJ: {dados.cnpj}</Text>
-          <Text>Situação: {dados.situacao}</Text>
-          <Text>Abertura: {dados.abertura}</Text>
-          <Text>Atividade: {dados.atividade_principal?.[0]?.text ?? '—'}</Text>
-          <Text>
-            Endereço: {dados.logradouro}, {dados.numero} - {dados.municipio}/{dados.uf}
-          </Text>
-          <Text>CEP: {dados.cep}</Text>
-          {!!dados.telefone && <Text>Telefone: {dados.telefone}</Text>}
-          {!!dados.email && <Text>E-mail: {dados.email}</Text>}
+          <Text style={styles.nome}>CEP: {dados.cep}</Text>
+          <Text>Logradouro: {dados.logradouro}</Text>
+          {!!dados.complemento && <Text>Complemento: {dados.complemento}</Text>}
+          <Text>Bairro: {dados.bairro}</Text>
+          <Text>Cidade/UF: {dados.localidade}/{dados.uf}</Text>
+          {!!dados.estado && <Text>Estado: {dados.estado}</Text>}
+          {!!dados.regiao && <Text>Região: {dados.regiao}</Text>}
         </View>
       )}
     </ScrollView>
@@ -74,11 +70,10 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: '#ccc', borderRadius: 8,
     padding: 12, marginBottom: 12, fontSize: 16
   },
-  loading: { marginTop: 24 },
+  loading: {marginTop: 24},
   card: {
     backgroundColor: '#f5f5f5', borderRadius: 8,
     padding: 16, marginTop: 16
   },
   nome: { fontSize: 18, fontWeight: 'bold', marginBottom: 4 },
-  fantasia: { fontSize: 15, color: '#555', marginBottom: 8 }
 });

@@ -5,7 +5,7 @@ import HomeStack from './HomeStack';
 import ProfileScreen from '../screens/ProfileScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import type { Item } from '../types';
-import ConsultaCnpjScreen from '../screens/ConsultaCnpjScreen';
+import ConsultaStack from './ConsultaStack';
 
 export type TabParamList = {
   HomeTab: undefined;
@@ -47,12 +47,13 @@ export default function TabNavigator({ itens, adicionarItem }: Props) {
       <Tab.Screen name="Settings" component={SettingsScreen} options={{ tabBarLabel: 'Configurações' }} />
     
     <Tab.Screen
-      name="Consulta"  component={ConsultaCnpjScreen}
-       options={{tabBarIcon: ({ color, size }) => (
-      <Ionicons name="search" color={color} size={size} />
-    )
-  }}
-/>
+      name="Consulta"
+      component={ConsultaStack}
+      options={{
+        tabBarIcon: ({ color, size }) => <Ionicons name="search" color={color} size={size} />,
+        headerShown: false,
+      }}
+    />
     
     </Tab.Navigator>
   );
